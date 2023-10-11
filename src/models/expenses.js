@@ -2,11 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const expenseSchema = new Schema({
-    name: {},
-    amount:{},
-    description: {},
-    items: {},
-    user:{}
-})
+    name: {
+        type: String,
+        required: true
+    },
+}, { timestamps: true })
 
-module.exports = mongoose.model("Expense", expenseSchema)
+export default mongoose.model("Expense", expenseSchema);

@@ -1,4 +1,4 @@
-const mongoose = reqire("mongoose");
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const tagsSchema = new Schema({
@@ -10,11 +10,11 @@ const tagsSchema = new Schema({
 		type: String,
 		required: true,
 	},
-	user: {
-		user_id: Schema.Types.ObjectId,
+	userId: {
+		type: Schema.Types.ObjectId,
 		required: true,
 		ref: "User"
 	}
 });
 
-module.exports = mongoose.model('Tags', tagsSchema)
+export default mongoose.model('Tags', tagsSchema)

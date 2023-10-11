@@ -11,21 +11,29 @@ const expenseItemSchema = new Schema({
         required: true
     },
     description: {
-        type: String
+        type: String,
+        require: false
     },
     category: {
         type: String,
         categoryId: Schema.Types.ObjectId,
         ref: "Categories"
     },
+    tags: {
+        type: String,
+        tagId: Schema.Types.ObjectId,
+        required: false
+    },
     purchasedAmount: {
         type: Number,
-
+        required: false
     },
-    expense: {
-        expenseId: Schema.Types.ObjectId,
-        ref:"Expense"
+    expenseId: {
+        type: Schema.Types.ObjectId,
+        ref: "Expense"
     }
+}, {
+    timestamps: true
 })
 
-module.exports= mongoose.model("ExpenseItem", expenseItemSchema)
+module.exports = mongoose.model("ExpenseItem", expenseItemSchema)

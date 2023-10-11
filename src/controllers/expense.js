@@ -1,7 +1,9 @@
+import express from 'express';
+
 const getExpenses = (req, res, next) => {
     res.status(200).json({
         message: "Expenses retrieved successfully",
-        data:[]
+        data: []
     })
 }
 
@@ -14,7 +16,9 @@ const getExpenseById = (req, res, next) => {
 }
 
 
-module.exports = {
+
+
+export const expenseController = {
     getExpenses,
     createExpense,
     getExpenseById

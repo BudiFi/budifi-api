@@ -1,16 +1,18 @@
-const express = require('express');
-const mongoose = require("mongoose");
-const bodyParser = require('body-parser');
+import dotenv from "dotenv";
+import express from 'express';
+import mongoose from "mongoose";
+import bodyParser from 'body-parser';
+import authRoutes from "./src/routes/auth.js";
+import expenseRoutes from "./src/routes/expense.js";
+import categoryRoutes from "./src/routes/category.js";
+
+dotenv.config();
+
 const MONGO_SECRET = process.env.MONGO_SECRET;
 const MONGO_USER = process.env.MONGO_USER;
-const MONGO_URI = `mongodb+srv://${MONGO_USER}:${MONGO_SECRET}@cluster0.l6ikclz.mongodb.net/?retryWrites=true&w=majority`;
+const STAGING_DB = process.env.MONGO_DEFAULT_DATABASE;
+const MONGO_URI = `mongodb+srv://${MONGO_USER}:${MONGO_SECRET}@cluster0.l6ikclz.mongodb.net/${STAGING_DB}`;
 
-const expenseRoutes = require("./routes/expense");
-const authRoutes = require("./routes/auth")
-const transactionsRoutes = require("./routes/transactions")
-const categoryRoutes = require("./routes/categories")
-const accountsRoutes = require("./routes/accounts")
-const incomeRoutes = require("./routes/income")
 
 
 const app = express();
@@ -22,19 +24,17 @@ app.use(bodyParser.json());
 
 app.use("/expenses", expenseRoutes);
 app.use('/auth', authRoutes);
-app.use("/transactions", transactionsRoutes);
 app.use("/category", categoryRoutes);
-app.use("/accounts", accountsRoutes);
-app.use("/income", incomeRoutes);
-
 
 
 mongoose.connect(MONGO_URI).then(() => {
     console.log("Connected to db successfully!")
-    app.listen(process.env.PORT||5050, () => {
-        console.log("App is running on port 5050" )
+    app.listen(process.env.PORT || 5050, () => {
+        console.log("App is running on port 5050")
     })
 }).catch((err) => {
-    console.log("Error connecting to db")
-    throw err
+    console.error(MONGO_URI)
+    const error = new Error(err.message, MONGO_URI);
+    error.statusCode = 500;
+    throw error
 })
