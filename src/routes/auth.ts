@@ -14,7 +14,10 @@ router.post(
 			.trim()
 			.isEmail()
 			.withMessage("Email is required"),
-		body("password").notEmpty().trim().withMessage("Password is required"),
+		body("password")
+			.notEmpty()
+			.trim()
+			.withMessage("Password is required"),
 	],
 	loginUser
 );
@@ -44,6 +47,7 @@ router.post(
 	],
 	signupUser
 );
+
 // POST /auth/forgot-password
 router.post(
 	"/forgot_password",
@@ -56,6 +60,7 @@ router.post(
 	],
 	signupUser
 );
+
 // POST /auth/reset-password
 router.post(
 	"/reset_password",

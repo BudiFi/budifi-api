@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/auth";
@@ -19,9 +19,30 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use((req, res, next) => {
+	res.setHeader("Access-Control-Allow-Origin", "*");
+	res.setHeader(
+		"Access-Control-Allow-Methods",
+		"GET, POST, PUT, PATCH, DELETE"
+	);
+	res.setHeader("Access-Control-Allow-Headers", "Content-Type Authorization");
+	next();
+});
+
 app.use("/expenses", expenseRoutes);
 app.use("/auth", authRoutes);
 app.use("/category", categoryRoutes);
+
+app.use(
+	(error: ResponseError, req: Request, res: Response, next: NextFunction) => {
+		console.log(error);
+		const status = error.status ?? 500;
+		const message = error.message;
+		res.status(status).json({
+			message: message,
+		});
+	}
+);
 
 mongoose
 	.connect(MONGO_URI)

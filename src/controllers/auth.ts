@@ -5,6 +5,7 @@ import UserModel from "../models/users";
 import { ResponseError } from "../types";
 
 const HASH_KEY = process.env.SECRET_KEY || "";
+console.log(HASH_KEY);
 
 const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 	const { email } = req.body;
@@ -43,7 +44,7 @@ const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const findUserByEmail = await UserModel.findOne({ email: email });
 		if (!findUserByEmail) {
-			const hashedPassword = await bcrypt.hash(password, HASH_KEY);
+			const hashedPassword = await bcrypt.hash(password, 10);
 
 			if (hashedPassword) {
 				await new UserModel({
@@ -52,20 +53,24 @@ const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 					email,
 					password: hashedPassword,
 				}).save();
-				res.status(201).json({
+				return res.status(201).json({
 					message: "User signed up successfully",
-					data: {},
+					data: {
+						first_name,
+						last_name,
+						email,
+					},
 				});
 			}
+		} else {
+			res.status(400).json({
+				message: "User with email already exists",
+			});
 		}
-		res.status(400).json({
-			message: "User with email already exists",
-		});
 	} catch (err) {
 		if (!err.status) {
 			err.status = 500;
 		}
-
 		next(err);
 	}
 };
