@@ -1,0 +1,52 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"lib": ["ESNext"],
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"rootDir": "src",
+		"moduleResolution": "node10",
+		"baseUrl": "./src/",
+		"paths": {
+			"@src/*": ["src/*"],
+			"@src": ["src"],
+			"@types/*": ["src/types/*"],
+			"@types": ["src/types"],
+			"@controllers/*": ["src/controllers/*"],
+			"@controllers": ["src/controllers"],
+			"@models/*": ["src/models/*"],
+			"@models": ["src/models"],
+			"@routes/*": ["src/routes/*"],
+			"@routes": ["src/routes"]
+		},
+		"allowImportingTsExtensions": true,
+		"resolveJsonModule": true,
+		"allowJs": false,
+		"declaration": true,
+		// "sourceMap": true,
+		"outDir": "./src/build",
+		// "removeComments": true,                           /* Disable emitting comments. */
+		"noEmit": true,
+		// "preserveValueImports": true,
+		"isolatedModules": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		// "strictFunctionTypes": true,
+		// "useUnknownInCatchVariables": true,
+		"alwaysStrict": true,
+		"noUnusedLocals": true,
+		"noFallthroughCasesInSwitch": true,
+		"skipLibCheck": true
+	},
+	"include": ["src/**/*", "**/*.ts"],
+	"exclude": [
+		"node_modules/*/",
+		".serverless/*/",
+		".webpack/*/",
+		"_warmup/*/",
+		".vscode/*/"
+	]
+}
