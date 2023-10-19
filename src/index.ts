@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
@@ -6,8 +6,6 @@ import authRoutes from "./routes/auth";
 import expenseRoutes from "./routes/expense";
 import categoryRoutes from "./routes/category";
 import { ResponseError } from "./types";
-
-dotenv.config();
 
 const MONGO_SECRET = process.env.MONGO_SECRET;
 const MONGO_USER = process.env.MONGO_USER;
