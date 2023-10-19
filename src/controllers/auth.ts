@@ -1,34 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import bcrypt from "bcrypt";
 import { validationResult } from "express-validator";
+import JWT from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import UserModel from "../models/users";
 import { ResponseError } from "../types";
 
-const HASH_KEY = process.env.SECRET_KEY || "";
-console.log(HASH_KEY);
-
-const loginUser = async (req: Request, res: Response, next: NextFunction) => {
-	const { email } = req.body;
-	const errors = validationResult(req);
-	if (!errors.isEmpty()) {
-		const err: ResponseError = new Error("Input required fields");
-		err.status = 400;
-		throw err;
-	}
-	try {
-		const result = UserModel.findOne({ email: email });
-		if (!result) {
-			res.status(404).json({
-				message: "User with email not found",
-			});
-		}
-		// UserModel.
-	} catch (error) {
-		const err: ResponseError = new Error(error);
-		err.status = 500;
-		return next(err);
-	}
-};
+const SECRET = process.env.SECRET_KEY ?? "";
 
 const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 	const { email, password, first_name, last_name } = req.body;
@@ -72,6 +49,49 @@ const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 			err.status = 500;
 		}
 		next(err);
+	}
+};
+
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+	const { email, password } = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const err: ResponseError = new Error("Input required fields");
+		err.status = 400;
+		throw err;
+	}
+	try {
+		const result = await UserModel.findOne({ email: email }).exec();
+		if (!result) {
+			return res.status(404).json({
+				message: "User with email not found",
+			});
+		}
+		const authPassword = await bcrypt.compare(password, result.password);
+		if (!authPassword) {
+			return res.status(400).json({
+				message: "Invalid login details",
+			});
+		}
+		const token = JWT.sign(
+			{
+				email: result.email,
+				userId: result._id.toString(),
+			},
+			SECRET,
+			{ expiresIn: "7d" }
+		);
+		res.status(201).json({
+			message: "User logged in successfully!",
+			data: {
+				token,
+				userId: result._id.toString(),
+			},
+		});
+	} catch (error) {
+		const err: ResponseError = new Error(error);
+		err.status = 500;
+		return next(err);
 	}
 };
 
