@@ -1,5 +1,6 @@
 export interface ResponseError extends Error {
 	status?: number;
+	data?: string | any[];
 }
 
 export type IUser = {
