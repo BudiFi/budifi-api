@@ -43,4 +43,4 @@ const expenseItemSchema = new Schema(
 	}
 );
 
-module.exports = mongoose.model("ExpenseItem", expenseItemSchema);
+export default mongoose.model("ExpenseItem", expenseItemSchema);

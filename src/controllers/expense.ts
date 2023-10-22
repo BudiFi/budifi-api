@@ -1,9 +1,14 @@
 import { Response, Request, NextFunction } from "express";
 import { validationResult } from "express-validator";
-import ExpenseModel from "../models/expenses";
 import { ResponseError } from "types";
+import ExpenseModel from "../models/expenses";
+import ExpenseItemModel from "../models/expenseItems";
 
-const getExpenses = async (req: Request, res: Response, next: NextFunction) => {
+export const getExpenses = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
 	try {
 		const expenses = await ExpenseModel.find();
 		res.status(200).json({
@@ -18,7 +23,7 @@ const getExpenses = async (req: Request, res: Response, next: NextFunction) => {
 	}
 };
 
-const createExpense = async (
+export const createExpense = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
@@ -44,7 +49,7 @@ const createExpense = async (
 	}
 };
 
-const getExpenseById = async (
+export const getExpenseById = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
@@ -70,8 +75,51 @@ const getExpenseById = async (
 	}
 };
 
-export const expenseController = {
-	getExpenses,
-	createExpense,
-	getExpenseById,
+export const addExpenseItem = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { id } = req.params;
+	const {
+		name,
+		amount,
+		description = "",
+		categoryId,
+		tags = [],
+		purchasedAmount = 0,
+	} = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: ResponseError = new Error("Required fields missing");
+		error.status = 400;
+		error.data = errors.array();
+		throw error;
+	}
+	try {
+		const expense = await ExpenseModel.findById(id);
+		if (!expense) {
+			return res.status(404).json({
+				message: "Expense with id not found",
+			});
+		}
+		const expenseItem = await new ExpenseItemModel({
+			name,
+			amount,
+			description,
+			categoryId,
+			tags,
+			purchasedAmount,
+			expenseId: id,
+		}).save();
+		return res.status(201).json({
+			message: "New Item added to list successfully!",
+			data: expenseItem,
+		});
+	} catch (error) {
+		if (!error.status) {
+			error.status = 500;
+		}
+		next(error);
+	}
 };
