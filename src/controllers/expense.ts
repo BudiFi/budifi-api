@@ -5,7 +5,7 @@ import { ResponseError } from "types";
 
 const getExpenses = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const expenses = await ExpenseModel.find().populate();
+		const expenses = await ExpenseModel.find();
 		res.status(200).json({
 			message: "Expenses retrieved successfully",
 			data: expenses,
@@ -44,8 +44,30 @@ const createExpense = async (
 	}
 };
 
-const getExpenseById = (req: Request, res: Response, next: NextFunction) => {
-	res.status(200).json({});
+const getExpenseById = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { id } = req.params;
+	console.log(id);
+	try {
+		const expense = await ExpenseModel.findById(id).populate();
+		if (!expense) {
+			return res.status(404).json({
+				message: "Expense with id not found",
+			});
+		}
+		res.status(200).json({
+			message: "Expense list retrieved successfully!",
+			data: expense,
+		});
+	} catch (error) {
+		if (!error.status) {
+			error.status = 500;
+		}
+		next(error);
+	}
 };
 
 export const expenseController = {
