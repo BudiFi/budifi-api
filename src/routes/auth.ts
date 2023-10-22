@@ -1,7 +1,7 @@
 import express from "express";
 import { body } from "express-validator";
 import { authController } from "../controllers/auth";
-const { loginUser, signupUser, forgotPassword } = authController;
+const { loginUser, signupUser, forgotPassword, resetPassword } = authController;
 
 const router = express.Router();
 
@@ -61,14 +61,8 @@ router.post(
 // POST /auth/reset-password
 router.post(
 	"/reset_password",
-	[
-		body("password")
-			.notEmpty()
-			.trim()
-			.isAlphanumeric()
-			.withMessage("Password is required"),
-	],
-	signupUser
+	[body("password").notEmpty().trim().withMessage("Password is required")],
+	resetPassword
 );
 
 export default router;

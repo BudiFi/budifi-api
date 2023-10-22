@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import { ResponseError } from "../types";
+import { forgotPasswordContent } from "../templates";
+import { sendEmail } from "../utils";
 import JWT from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Cryptr from "cryptr";
-import { forgotPasswordContent } from "../templates";
-import { sendEmail } from "../utils";
+import mongoose from "mongoose";
 
 import UserModel from "../models/users";
 
@@ -109,29 +110,79 @@ const forgotPassword = async (
 	next: NextFunction
 ) => {
 	const { email } = req.body;
-	const user = await UserModel.findOne({ email }).exec();
-	if (!user) {
-		return res.status(200).json({
-			message:
-				"If user exists reset email would be sent to your email address",
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const err: ResponseError = new Error("Input required fields");
+		err.status = 400;
+		throw err;
+	}
+	try {
+		const user = await UserModel.findOne({ email }).exec();
+		if (!user) {
+			return res.status(200).json({
+				message:
+					"If user exists reset email would be sent to your email address",
+			});
+		}
+		const userId = user._id.toString();
+		const encryptedToken = cryptr.encrypt(userId);
+		sendEmail(
+			user.email,
+			user.first_name,
+			"Forgot Password",
+			"BudiFi",
+			"support@budifi.com",
+			forgotPasswordContent(encryptedToken)
+		);
+		res.status(201).json({
+			message: "Reset link sent successfully!",
+		});
+	} catch (error) {
+		const err: ResponseError = new Error(error);
+		err.status = 500;
+		return next(err);
+	}
+};
+
+const resetPassword = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const errors = validationResult(req);
+	const { token  } = req.query;
+	const { password } = req.body;
+	if (!errors.isEmpty()) {
+		const err: ResponseError = new Error("Input required fields");
+		err.status = 400;
+		throw err;
+	}
+	if (token) {
+		const decryptedToken = cryptr.decrypt(token as string);
+		const userId = new mongoose.Types.ObjectId(decryptedToken);
+		try {
+			const hashedPassword = await bcrypt.hash(password, 10);
+			await UserModel.findOneAndUpdate(userId, {
+				password: hashedPassword,
+			});
+			res.status(201).json({
+				message: "Password updated successfully!",
+			});
+		} catch (error) {
+			const err: ResponseError = new Error(error);
+			err.status = 500;
+			return next(err);
+		}
+	} else {
+		res.status(400).json({
+			message: "Invalid token",
 		});
 	}
-	const encryptedToken = cryptr.encrypt(user._id.toString());
-	sendEmail(
-		user.email,
-		user.first_name,
-		"Forgot Password",
-		"BudiFi",
-		"support@budifi.com",
-		forgotPasswordContent(encryptedToken)
-	);
-	res.status(201).json({
-		message: "Reset link sent successfully!",
-	});
 };
 
 export const authController = {
 	loginUser,
 	signupUser,
 	forgotPassword,
+	resetPassword,
 };
