@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/auth";
+import path from "path";
 import expenseRoutes from "./routes/expense";
 import categoryRoutes from "./routes/category";
 import { ResponseError } from "./types";
@@ -16,6 +17,8 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+app.use(express.static(path.join(__dirname, "template")));
 
 app.use((req, res, next) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
