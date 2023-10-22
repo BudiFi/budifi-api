@@ -1,11 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
+import { ResponseError } from "../types";
 import JWT from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import Cryptr from "cryptr";
+import { forgotPasswordContent } from "../templates";
+import { sendEmail } from "../utils";
+
 import UserModel from "../models/users";
-import { ResponseError } from "../types";
 
 const SECRET = process.env.SECRET_KEY ?? "";
+const cryptr = new Cryptr(SECRET, {
+	encoding: "base64",
+	saltLength: 10,
+});
 
 const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 	const { email, password, first_name, last_name } = req.body;
@@ -95,7 +103,35 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 	}
 };
 
+const forgotPassword = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { email } = req.body;
+	const user = await UserModel.findOne({ email }).exec();
+	if (!user) {
+		return res.status(200).json({
+			message:
+				"If user exists reset email would be sent to your email address",
+		});
+	}
+	const encryptedToken = cryptr.encrypt(user._id.toString());
+	sendEmail(
+		user.email,
+		user.first_name,
+		"Forgot Password",
+		"BudiFi",
+		"support@budifi.com",
+		forgotPasswordContent(encryptedToken)
+	);
+	res.status(201).json({
+		message: "Reset link sent successfully!",
+	});
+};
+
 export const authController = {
 	loginUser,
 	signupUser,
+	forgotPassword,
 };

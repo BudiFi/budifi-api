@@ -1,7 +1,7 @@
 import express from "express";
 import { body } from "express-validator";
 import { authController } from "../controllers/auth";
-const { loginUser, signupUser } = authController;
+const { loginUser, signupUser, forgotPassword } = authController;
 
 const router = express.Router();
 
@@ -14,10 +14,7 @@ router.post(
 			.trim()
 			.isEmail()
 			.withMessage("Email is required"),
-		body("password")
-			.notEmpty()
-			.trim()
-			.withMessage("Password is required"),
+		body("password").notEmpty().trim().withMessage("Password is required"),
 	],
 	loginUser
 );
@@ -58,7 +55,7 @@ router.post(
 			.isEmail()
 			.withMessage("Email is required"),
 	],
-	signupUser
+	forgotPassword
 );
 
 // POST /auth/reset-password
