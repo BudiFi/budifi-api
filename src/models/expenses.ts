@@ -7,7 +7,15 @@ const expenseSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		items: [
+			{
+				type: Schema.Types.ObjectId,
+				required: true,
+				ref: "ExpenseItem",
+			},
+		],
 	},
+
 	{ timestamps: true }
 );
 

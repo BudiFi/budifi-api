@@ -10,7 +10,7 @@ export const getExpenses = async (
 	next: NextFunction
 ) => {
 	try {
-		const expenses = await ExpenseModel.find();
+		const expenses = await ExpenseModel.find().populate();
 		res.status(200).json({
 			message: "Expenses retrieved successfully",
 			data: expenses,
@@ -112,6 +112,8 @@ export const addExpenseItem = async (
 			purchasedAmount,
 			expenseId: id,
 		}).save();
+		expense.items.push(expenseItem._id);
+		await expense.save();
 		return res.status(201).json({
 			message: "New Item added to list successfully!",
 			data: expenseItem,
