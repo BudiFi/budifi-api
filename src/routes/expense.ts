@@ -14,6 +14,7 @@ router.post(
 	[body("title").notEmpty().trim().withMessage("Expense title is required")],
 	createExpense
 );
+router.post("/:id/expense-item", authenticate, createExpense);
 router.put("/", authenticate, createExpense);
 router.delete("/", authenticate, createExpense);
 
