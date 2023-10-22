@@ -9,12 +9,13 @@ const tagsSchema = new Schema({
 	color: {
 		type: String,
 		required: true,
+		default: "#8C75FA",
 	},
 	userId: {
 		type: Schema.Types.ObjectId,
 		required: true,
-		ref: "User"
-	}
+		ref: "User",
+	},
 });
 
-export default mongoose.model('Tags', tagsSchema)
+export default mongoose.model("Tags", tagsSchema);

@@ -1,9 +1,11 @@
 import express from "express";
 import { categoryController } from "../controllers/category";
+import { authenticate } from "../middleware/auth";
 
 const router = express.Router();
-const { getCategories } = categoryController;
+const { getCategories, createCategory } = categoryController;
 
-router.get("/", getCategories);
+router.get("/", authenticate, getCategories);
+router.post("/", authenticate, createCategory);
 
 export default router;
