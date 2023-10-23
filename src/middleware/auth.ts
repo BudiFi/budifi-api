@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { ResponseError } from "types";
 
 const SECRET = process.env.SECRET_KEY ?? "";
 
@@ -11,7 +10,7 @@ export const authenticate = (
 ) => {
 	const authHeader = req.get("Authorization");
 	if (!authHeader) {
-		const err: ResponseError = new Error("Unauthenticated");
+		const err: any = new Error("Unauthenticated");
 		err.status = 401;
 		throw err;
 	}
@@ -21,12 +20,12 @@ export const authenticate = (
 		try {
 			verifiedToken = jwt.verify(token, SECRET);
 			next();
-		} catch (err) {
+		} catch (err: any) {
 			err.status = 400;
 			throw err;
 		}
 		if (!verifiedToken) {
-			const err: ResponseError = new Error("Not Authenticated");
+			const err: any = new Error("Not Authenticated");
 			err.status = 400;
 			throw err;
 		}

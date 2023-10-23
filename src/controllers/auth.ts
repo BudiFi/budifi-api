@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
-import { ResponseError } from "../types";
 import { forgotPasswordContent } from "../templates";
 import { sendEmail } from "../utils";
 import JWT from "jsonwebtoken";
@@ -20,9 +19,7 @@ const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 	const { email, password, first_name, last_name } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		const err: ResponseError = new Error(
-			"Validation failed, input required fields"
-		);
+		const err: any = new Error("Validation failed, input required fields");
 		err.status = 422;
 		throw err;
 	}
@@ -53,7 +50,7 @@ const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 				message: "User with email already exists",
 			});
 		}
-	} catch (err) {
+	} catch (err: any) {
 		if (!err.status) {
 			err.status = 500;
 		}
@@ -65,7 +62,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 	const { email, password } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		const err: ResponseError = new Error("Input required fields");
+		const err: any = new Error("Input required fields");
 		err.status = 400;
 		throw err;
 	}
@@ -97,8 +94,8 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 				userId: result._id.toString(),
 			},
 		});
-	} catch (error) {
-		const err: ResponseError = new Error(error);
+	} catch (error: any) {
+		const err: any = new Error(error);
 		err.status = 500;
 		return next(err);
 	}
@@ -112,7 +109,7 @@ const forgotPassword = async (
 	const { email } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		const err: ResponseError = new Error("Input required fields");
+		const err: any = new Error("Input required fields");
 		err.status = 400;
 		throw err;
 	}
@@ -137,8 +134,8 @@ const forgotPassword = async (
 		res.status(201).json({
 			message: "Reset link sent successfully!",
 		});
-	} catch (error) {
-		const err: ResponseError = new Error(error);
+	} catch (error: any) {
+		const err: any = new Error(error);
 		err.status = 500;
 		return next(err);
 	}
@@ -150,10 +147,10 @@ const resetPassword = async (
 	next: NextFunction
 ) => {
 	const errors = validationResult(req);
-	const { token  } = req.query;
+	const { token } = req.query;
 	const { password } = req.body;
 	if (!errors.isEmpty()) {
-		const err: ResponseError = new Error("Input required fields");
+		const err: any = new Error("Input required fields");
 		err.status = 400;
 		throw err;
 	}
@@ -168,8 +165,8 @@ const resetPassword = async (
 			res.status(201).json({
 				message: "Password updated successfully!",
 			});
-		} catch (error) {
-			const err: ResponseError = new Error(error);
+		} catch (error: any) {
+			const err: any = new Error(error);
 			err.status = 500;
 			return next(err);
 		}
