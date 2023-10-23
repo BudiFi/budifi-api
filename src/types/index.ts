@@ -1,7 +1,8 @@
-export interface ResponseError extends Error {
+export type CatchError = Error & ResponseError;
+export type ResponseError = {
 	status?: number;
 	data?: string | any[];
-}
+};
 
 export type IUser = {
 	email: string;

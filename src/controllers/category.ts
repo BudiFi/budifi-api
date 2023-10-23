@@ -14,7 +14,7 @@ const getCategories = async (
 				data: categories,
 			});
 		}
-	} catch (error) {
+	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
 		}
@@ -36,7 +36,7 @@ const createCategory = async (
 			message: "New Category created successfully",
 			data: newCategory,
 		});
-	} catch (error) {
+	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
 		}

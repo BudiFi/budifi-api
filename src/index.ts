@@ -2,11 +2,10 @@ import "dotenv/config";
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import authRoutes from "./routes/auth";
+import authRoutes from "@routes/auth";
 import path from "path";
-import expenseRoutes from "./routes/expense";
-import categoryRoutes from "./routes/category";
-import { ResponseError } from "./types";
+import expenseRoutes from "@routes/expense";
+import categoryRoutes from "@routes/category";
 
 const MONGO_SECRET = process.env.MONGO_SECRET;
 const MONGO_USER = process.env.MONGO_USER;
@@ -34,16 +33,14 @@ app.use("/expenses", expenseRoutes);
 app.use("/auth", authRoutes);
 app.use("/category", categoryRoutes);
 
-app.use(
-	(error: ResponseError, req: Request, res: Response, next: NextFunction) => {
-		console.log(error);
-		const status = error.status ?? 500;
-		const message = error.message;
-		res.status(status).json({
-			message: message,
-		});
-	}
-);
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+	console.log(error);
+	const status = error.status ?? 500;
+	const message = error.message;
+	res.status(status).json({
+		message: message,
+	});
+});
 
 mongoose
 	.connect(MONGO_URI)
@@ -54,7 +51,7 @@ mongoose
 		});
 	})
 	.catch(err => {
-		const error: ResponseError = new Error(err.message);
+		const error: any = new Error(err.message);
 		error.status = 500;
 		throw error;
 	});

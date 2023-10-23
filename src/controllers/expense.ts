@@ -1,6 +1,5 @@
 import { Response, Request, NextFunction } from "express";
 import { validationResult } from "express-validator";
-import { ResponseError } from "types";
 import ExpenseModel from "../models/expenses";
 import ExpenseItemModel from "../models/expenseItems";
 
@@ -15,7 +14,7 @@ export const getExpenses = async (
 			message: "Expenses retrieved successfully",
 			data: expenses,
 		});
-	} catch (error) {
+	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
 		}
@@ -31,7 +30,7 @@ export const createExpense = async (
 	const { title } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		const error: ResponseError = new Error("Expense title is required");
+		const error: any = new Error("Expense title is required");
 		error.status = 400;
 		throw error;
 	}
@@ -41,7 +40,7 @@ export const createExpense = async (
 			message: "New Expense created successfully!",
 			data: newExpense,
 		});
-	} catch (error) {
+	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
 		}
@@ -67,7 +66,7 @@ export const getExpenseById = async (
 			message: "Expense list retrieved successfully!",
 			data: expense,
 		});
-	} catch (error) {
+	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
 		}
@@ -91,7 +90,7 @@ export const addExpenseItem = async (
 	} = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
-		const error: ResponseError = new Error("Required fields missing");
+		const error: any = new Error("Required fields missing");
 		error.status = 400;
 		error.data = errors.array();
 		throw error;
@@ -118,7 +117,41 @@ export const addExpenseItem = async (
 			message: "New Item added to list successfully!",
 			data: expenseItem,
 		});
-	} catch (error) {
+	} catch (error: any) {
+		if (!error.status) {
+			error.status = 500;
+		}
+		next(error);
+	}
+};
+
+export const updateExpense = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { id } = req.params;
+	const { title } = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: any = new Error("Required fields not available");
+		error.status = 400;
+		throw error;
+	}
+	try {
+		const expense = await ExpenseModel.findById(id);
+		if (!expense) {
+			return res.status(404).json({
+				message: "Expense with id not found",
+			});
+		}
+		expense.title = title;
+		await expense.save();
+		return res.status(201).json({
+			message: "Expense updated successfully!",
+			data: expense,
+		});
+	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
 		}
