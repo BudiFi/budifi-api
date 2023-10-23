@@ -9,7 +9,7 @@ export const getExpenses = async (
 	next: NextFunction
 ) => {
 	try {
-		const expenses = await ExpenseModel.find().populate();
+		const expenses = await ExpenseModel.find();
 		res.status(200).json({
 			message: "Expenses retrieved successfully",
 			data: expenses,
@@ -65,6 +65,31 @@ export const getExpenseById = async (
 		res.status(200).json({
 			message: "Expense list retrieved successfully!",
 			data: expense,
+		});
+	} catch (error: any) {
+		if (!error.status) {
+			error.status = 500;
+		}
+		next(error);
+	}
+};
+
+export const getExpenseItemById = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { expenseItemId } = req.params;
+	try {
+		const expenseItem = await ExpenseItemModel.findById(expenseItemId);
+		if (!expenseItem) {
+			return res.status(404).json({
+				message: "Expense item with id not found",
+			});
+		}
+		res.status(200).json({
+			message: "Expense Item retrieved successfully",
+			data: expenseItem,
 		});
 	} catch (error: any) {
 		if (!error.status) {
@@ -150,6 +175,54 @@ export const updateExpense = async (
 		return res.status(201).json({
 			message: "Expense updated successfully!",
 			data: expense,
+		});
+	} catch (error: any) {
+		if (!error.status) {
+			error.status = 500;
+		}
+		next(error);
+	}
+};
+
+export const updateExpenseItem = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { id } = req.params;
+	const {
+		name,
+		amount,
+		description = "",
+		categoryId,
+		tags = [],
+		purchasedAmount = 0,
+	} = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: any = new Error("Provide required parameters");
+		error.status = 400;
+		error.data = errors.array();
+		throw error;
+	}
+	try {
+		const expenseItem = await ExpenseItemModel.findById(id);
+		if (!expenseItem) {
+			return res.status(404).json({
+				message: "Item with Id not found",
+			});
+		}
+		expenseItem.name = name;
+		expenseItem.amount = amount;
+		expenseItem.description = description;
+		expenseItem.categoryId = categoryId;
+		expenseItem.tags = tags;
+		expenseItem.purchasedAmount = purchasedAmount;
+
+		const result = await expenseItem.save();
+		return res.status(201).json({
+			message: "Item updated successfully!",
+			data: result,
 		});
 	} catch (error: any) {
 		if (!error.status) {
