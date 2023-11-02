@@ -1,0 +1,24 @@
+{
+	"env": {
+		"browser": true,
+		"commonjs": true,
+		"es2021": true
+	},
+	"extends": ["prettier", "plugin:@typescript-eslint/recommended"],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": "latest",
+		"project": "tsconfig.json"
+	},
+	"plugins": ["prettier", "@typescript-eslint/recommended"],
+	"rules": {
+		"@typescript-eslint/consistent-type-definitions": ["error", "type"],
+		"@typescript-eslint/member-delimiter-style": "off",
+		"no-console": "off",
+		"import/prefer-default-export": "off",
+		"@typescript-eslint/no-unused-vars": "warn",
+		"prettier/prettier": "error",
+		"no-resolved": "off",
+		"import/extensions": 0
+	}
+}

@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
-import { forgotPasswordContent } from "../templates";
-import { sendEmail } from "../utils";
 import JWT from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import Cryptr from "cryptr";
 import mongoose from "mongoose";
-
-import UserModel from "../models/users";
+import UserModel from "@models/users";
+import { validationResult } from "express-validator";
+import { forgotPasswordContent } from "@templates/forgotPassword";
+import { sendEmail } from "@utils/index";
 
 const SECRET = process.env.SECRET_KEY ?? "";
 const cryptr = new Cryptr(SECRET, {
@@ -101,11 +100,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 	}
 };
 
-const forgotPassword = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
 	const { email } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -117,8 +112,7 @@ const forgotPassword = async (
 		const user = await UserModel.findOne({ email }).exec();
 		if (!user) {
 			return res.status(200).json({
-				message:
-					"If user exists reset email would be sent to your email address",
+				message: "If user exists reset email would be sent to your email address",
 			});
 		}
 		const userId = user._id.toString();
@@ -141,11 +135,7 @@ const forgotPassword = async (
 	}
 };
 
-const resetPassword = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
 	const errors = validationResult(req);
 	const { token } = req.query;
 	const { password } = req.body;

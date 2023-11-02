@@ -9,7 +9,7 @@ const transport = nodemailer.createTransport({
 	},
 });
 
-export const sendEmail = (
+export const sendEmail = async (
 	recipientEmail: string,
 	recipientName: string,
 	subject: string,
@@ -17,7 +17,7 @@ export const sendEmail = (
 	senderEmail: string,
 	mailContent: any
 ) => {
-	transport.sendMail({
+	await transport.sendMail({
 		text: "Welcome to Mailtrap Sending!",
 		to: {
 			address: recipientEmail,

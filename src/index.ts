@@ -46,7 +46,7 @@ mongoose
 	.connect(MONGO_URI)
 	.then(() => {
 		console.log("Connected to db successfully!");
-		app.listen(process.env.PORT || 5050, () => {
+		app.listen(process.env.PORT ?? 5050, () => {
 			console.log("App is running on port 5050");
 		});
 	})
