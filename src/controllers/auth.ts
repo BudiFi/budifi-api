@@ -1,13 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
-import { forgotPasswordContent } from "../templates";
-import { sendEmail } from "../utils";
-import JWT from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import Cryptr from "cryptr";
-import mongoose from "mongoose";
-
-import UserModel from "../models/users";
+import { validationResult } from "express-validator";
+import { forgotPasswordContent } from "@templates/forgotPassword";
+import { sendEmail } from "@src/thirdParty/emailService";
+import { utilsService } from "@services/index";
+import { userService } from "@src/services/user";
 
 const SECRET = process.env.SECRET_KEY ?? "";
 const cryptr = new Cryptr(SECRET, {
@@ -25,31 +22,36 @@ const signupUser = async (req: Request, res: Response, next: NextFunction) => {
 	}
 
 	try {
-		const findUserByEmail = await UserModel.findOne({ email: email });
+		const findUserByEmail = await userService.getUserByEmail(email);
 		if (!findUserByEmail) {
-			const hashedPassword = await bcrypt.hash(password, 10);
+			const hashedPassword = await utilsService.hashPassword(password);
 
 			if (hashedPassword) {
-				await new UserModel({
+				const createUser = await userService.signupUser({
 					first_name,
 					last_name,
 					email,
 					password: hashedPassword,
-				}).save();
-				return res.status(201).json({
-					message: "User signed up successfully",
-					data: {
-						first_name,
-						last_name,
-						email,
-					},
 				});
+				if (createUser) {
+					return res.status(201).json({
+						message: "User signed up successfully",
+						data: {
+							first_name,
+							last_name,
+							email,
+						},
+					});
+				} else {
+					res.status(400).json({
+						message: "User with email already exists",
+					});
+				}
 			}
-		} else {
-			res.status(400).json({
-				message: "User with email already exists",
-			});
 		}
+		return res.status(400).json({
+			message: "User with email already exist, login instead",
+		});
 	} catch (err: any) {
 		if (!err.status) {
 			err.status = 500;
@@ -67,26 +69,19 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 		throw err;
 	}
 	try {
-		const result = await UserModel.findOne({ email: email }).exec();
+		const result = await userService.getUserByEmail(email);
 		if (!result) {
 			return res.status(404).json({
 				message: "User with email not found",
 			});
 		}
-		const authPassword = await bcrypt.compare(password, result.password);
+		const authPassword = await utilsService.comparePassword(password, result.password);
 		if (!authPassword) {
 			return res.status(400).json({
 				message: "Invalid login details",
 			});
 		}
-		const token = JWT.sign(
-			{
-				email: result.email,
-				userId: result._id.toString(),
-			},
-			SECRET,
-			{ expiresIn: "7d" }
-		);
+		const token = utilsService.generateToken(result.email, result._id.toString());
 		res.status(201).json({
 			message: "User logged in successfully!",
 			data: {
@@ -101,11 +96,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
 	}
 };
 
-const forgotPassword = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
 	const { email } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -114,23 +105,15 @@ const forgotPassword = async (
 		throw err;
 	}
 	try {
-		const user = await UserModel.findOne({ email }).exec();
+		const user = await userService.getUserByEmail(email);
 		if (!user) {
 			return res.status(200).json({
-				message:
-					"If user exists reset email would be sent to your email address",
+				message: "If user exists reset email would be sent to your email address",
 			});
 		}
 		const userId = user._id.toString();
 		const encryptedToken = cryptr.encrypt(userId);
-		sendEmail(
-			user.email,
-			user.first_name,
-			"Forgot Password",
-			"BudiFi",
-			"support@budifi.com",
-			forgotPasswordContent(encryptedToken)
-		);
+		sendEmail(user.email, user.first_name, "Forgot Password", forgotPasswordContent(encryptedToken));
 		res.status(201).json({
 			message: "Reset link sent successfully!",
 		});
@@ -141,11 +124,7 @@ const forgotPassword = async (
 	}
 };
 
-const resetPassword = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
 	const errors = validationResult(req);
 	const { token } = req.query;
 	const { password } = req.body;
@@ -156,15 +135,16 @@ const resetPassword = async (
 	}
 	if (token) {
 		const decryptedToken = cryptr.decrypt(token as string);
-		const userId = new mongoose.Types.ObjectId(decryptedToken);
+
 		try {
-			const hashedPassword = await bcrypt.hash(password, 10);
-			await UserModel.findOneAndUpdate(userId, {
-				password: hashedPassword,
-			});
-			res.status(201).json({
-				message: "Password updated successfully!",
-			});
+			if (decryptedToken) {
+				const result = await userService.resetUserPassword(password, decryptedToken);
+				if (result) {
+					res.status(201).json({
+						message: "Password updated successfully!",
+					});
+				}
+			}
 		} catch (error: any) {
 			const err: any = new Error(error);
 			err.status = 500;

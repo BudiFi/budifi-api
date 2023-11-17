@@ -7,6 +7,7 @@ import {
 	updateExpense,
 	updateExpenseItem,
 	getExpenseItemById,
+	deleteExpenseItem,
 } from "../controllers/expense";
 import { authenticate } from "../middleware/auth";
 import { body, param } from "express-validator";
@@ -79,6 +80,16 @@ router.put(
 router.delete("/:id", authenticate, createExpense);
 
 // DELETE /expenses/:id/expense-item/:expenseItemId
-router.delete("/:id/expense-item/:expenseItemId", authenticate, createExpense);
+router.delete(
+	"/:id/expense-item/:expenseItemId",
+	authenticate,
+	[
+		param("id").exists().withMessage("expenseId is required"),
+		param("expenseItemId")
+			.exists()
+			.withMessage("expenseItemId is required"),
+	],
+	deleteExpenseItem
+);
 
 export default router;

@@ -13,26 +13,23 @@
 		"strict": true,
 		"target": "esnext",
 		"module": "CommonJS",
-		"outDir": ".build",
+		"outDir": "build",
 		"rootDir": "./",
 		"baseUrl": "./",
 		"strictPropertyInitialization": false, // TypeORM : https://github.com/typeorm/typeorm/issues/2797
 		"paths": {
 			"@src/*": ["./src/*"],
 			"@routes/*": ["./src/routes/*"],
-			"@types/*": ["./src/types/*"],
+			"@types/*": ["src/interfaces/*"],
 			"@models/*": ["./src/models/*"],
 			"@controllers/*": ["./src/controllers/*"],
-			"@templates/*": ["./src/templates/*"],
+			"@templates/*": ["./src/assets/templates/*"],
+			"@utils/*": ["./src/utils/*"],
+			"@services/*": ["./src/services/*"],
+			"@repository/*": ["./src/repository/*"],
 			"~tests/": ["tests/"]
 		}
 	},
 	"include": ["./src/**/*"], // for alias see webpack config
-	"exclude": [
-		"node_modules/*/",
-		".serverless/*/",
-		".webpack/*/",
-		"_warmup/*/",
-		".vscode/*/"
-	]
+	"exclude": ["node_modules/*/", ".serverless/*/", ".webpack/*/", "_warmup/*/", ".vscode/*/"]
 }

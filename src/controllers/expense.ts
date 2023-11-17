@@ -1,4 +1,4 @@
-import { Response, Request, NextFunction } from "express";
+import { type Response, type Request, type NextFunction } from "express";
 import { validationResult } from "express-validator";
 import ExpenseModel from "../models/expenses";
 import ExpenseItemModel from "../models/expenseItems";
@@ -224,6 +224,36 @@ export const updateExpenseItem = async (
 			message: "Item updated successfully!",
 			data: result,
 		});
+	} catch (error: any) {
+		if (!error.status) {
+			error.status = 500;
+		}
+		next(error);
+	}
+};
+
+export const deleteExpenseItem = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const { id, expenseItemId } = req.params;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: any = new Error("Provide required parameters");
+		error.status = 400;
+		error.data = errors.array();
+		throw error;
+	}
+	try {
+		const expenseItem = await ExpenseItemModel.findById(expenseItemId);
+		const expense = await ExpenseModel.findById(id);
+
+		if (!expenseItem) {
+			return res.status(404).json({
+				message: "Expense item with id not found",
+			});
+		}
 	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
