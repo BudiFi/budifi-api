@@ -1,25 +1,33 @@
-import { IUser, IUserRepository } from "@src/interfaces/users";
 import UserModel from "@models/users";
+import mongoose from "mongoose";
+import { IUserRepository, IUserResponse } from "@src/interfaces/users";
 
-const getUserById = (id: string) => {
-	return UserModel.findById(id);
+const findById = async (id: string): Promise<IUserResponse | null> => {
+	const user = await UserModel.findById(id).exec();
+	return user?.toObject() ?? null;
 };
 
-const getUserByEmail = (email: string) => {
-	return UserModel.findOne({ email: email });
+const findOne = async (findParams: any): Promise<IUserResponse | null> => {
+	const user = await UserModel.findOne(findParams).exec();
+	return user?.toObject() ?? null;
 };
 
-const updateUser = (value: IUser) => {
-	return new UserModel(value).save();
+const create = async (value: any): Promise<IUserResponse | null> => {
+	const user = await new UserModel(value).save();
+	return user?.toObject() ?? null;
+};
+const findOneAndUpdate = async (
+	searchParams: string,
+	updateValue: Record<string, any>
+): Promise<IUserResponse | null> => {
+	const id = new mongoose.Types.ObjectId(searchParams);
+	const result = await UserModel.findByIdAndUpdate(id, updateValue, { new: true }).exec();
+	return result?.toObject() ?? null;
 };
 
-const createUser = async (value: any) => {
-	return await new UserModel(value).save;
-};
-
-export const UserRespository = {
-	getUserById,
-	getUserByEmail,
-	updateUser,
-	createUser,
+export const UserRespository: IUserRepository = {
+	findById,
+	findOne,
+	create,
+	findOneAndUpdate,
 };

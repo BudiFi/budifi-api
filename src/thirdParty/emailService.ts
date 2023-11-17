@@ -9,14 +9,7 @@ const transport = nodemailer.createTransport({
 	},
 });
 
-export const sendEmail = async (
-	recipientEmail: string,
-	recipientName: string,
-	subject: string,
-	senderName: string,
-	senderEmail: string,
-	mailContent: any
-) => {
+export const sendEmail = async (recipientEmail: string, recipientName: string, subject: string, mailContent: any) => {
 	await transport.sendMail({
 		text: "Welcome to Mailtrap Sending!",
 		to: {
@@ -24,8 +17,8 @@ export const sendEmail = async (
 			name: recipientName,
 		},
 		from: {
-			address: senderEmail,
-			name: senderName,
+			address: "support@budifi.com",
+			name: "BudiFi",
 		},
 		subject: subject,
 		html: mailContent,

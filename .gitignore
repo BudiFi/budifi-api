@@ -90,6 +90,7 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+build
 
 # Gatsby files
 .cache/
@@ -131,4 +132,7 @@ dist
 
 **/.DS_Store
 
-.build/
+build/*
+**/build
+**/.build
+/build/
