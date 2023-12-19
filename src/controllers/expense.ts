@@ -1,6 +1,6 @@
-import { type Response, type Request, type NextFunction } from "express";
-import { validationResult } from "express-validator";
 import ExpenseModel from "../models/expenses";
+import { validationResult } from "express-validator";
+import { type Response, type Request, type NextFunction } from "express";
 import { ExpenseService } from "@src/services/expense";
 import mongoose from "mongoose";
 
@@ -101,7 +101,6 @@ export const addExpenseItem = async (req: Request, res: Response, next: NextFunc
 		error.data = errors.array();
 		throw error;
 	}
-	console.log(id, "expenseId");
 	try {
 		const newItem = await ExpenseService.createItem(id, {
 			name,

@@ -1,5 +1,5 @@
 import { ExpenseRepository } from "@src/repository/expense";
-import mongoose, { Document } from "mongoose";
+import { Document } from "mongoose";
 import { ICreateProps, IExpenseResponse, IExpenseItemProps, IExpenseItemResponse } from "@src/interfaces/expense";
 import { staticError } from "@utils/index";
 

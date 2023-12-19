@@ -6,6 +6,7 @@ import authRoutes from "@routes/auth";
 import path from "path";
 import expenseRoutes from "@routes/expense";
 import categoryRoutes from "@routes/category";
+import incomeRoutes from "@routes/income";
 
 const MONGO_SECRET = process.env.MONGO_SECRET;
 const MONGO_USER = process.env.MONGO_USER;
@@ -21,15 +22,13 @@ app.use(express.static(path.join(__dirname, "template")));
 
 app.use((req, res, next) => {
 	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader(
-		"Access-Control-Allow-Methods",
-		"GET, POST, PUT, PATCH, DELETE"
-	);
+	res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
 	res.setHeader("Access-Control-Allow-Headers", "Content-Type Authorization");
 	next();
 });
 
 app.use("/expenses", expenseRoutes);
+app.use("/income", incomeRoutes);
 app.use("/auth", authRoutes);
 app.use("/category", categoryRoutes);
 
