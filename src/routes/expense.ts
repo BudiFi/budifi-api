@@ -1,8 +1,8 @@
 import express from "express";
 import {
-	getExpenses,
+	getExpensesList,
 	createExpense,
-	getExpenseById,
+	getExpenseListById,
 	addExpenseItem,
 	updateExpense,
 	updateExpenseItem,
@@ -14,10 +14,10 @@ import { body, param } from "express-validator";
 const router = express.Router();
 
 // GET /expenses
-router.get("/", authenticate, getExpenses);
+router.get("/", authenticate, getExpensesList);
 
 // GET /expenses/:id
-router.get("/:id", authenticate, getExpenseById);
+router.get("/:id", authenticate, getExpenseListById);
 
 // GET /expenses/expense-item/:expenseItemId
 router.get("/expense-item/:expenseItemId", authenticate, getExpenseItemById);
@@ -35,10 +35,7 @@ router.put(
 	"/:id",
 	authenticate,
 	[
-		body("title")
-			.notEmpty()
-			.trim()
-			.withMessage("Expense title is required"),
+		body("title").notEmpty().trim().withMessage("Expense title is required"),
 		param("id").exists().isString().withMessage("Expense id is requuired"),
 	],
 	updateExpense
@@ -52,10 +49,7 @@ router.post(
 		param("id").exists().isString().withMessage("Expense id is required"),
 		body("name").notEmpty().trim().withMessage("name is required"),
 		body("amount").notEmpty().trim().withMessage("amount is required"),
-		body("categoryId")
-			.notEmpty()
-			.trim()
-			.withMessage("categoryId is required"),
+		body("categoryId").notEmpty().trim().withMessage("categoryId is required"),
 	],
 	addExpenseItem
 );
@@ -68,10 +62,7 @@ router.put(
 		param("id").exists().isString().withMessage("Expense id is required"),
 		body("name").notEmpty().trim().withMessage("name is required"),
 		body("amount").notEmpty().trim().withMessage("amount is required"),
-		body("categoryId")
-			.notEmpty()
-			.trim()
-			.withMessage("categoryId is required"),
+		body("categoryId").notEmpty().trim().withMessage("categoryId is required"),
 	],
 	updateExpenseItem
 );
@@ -85,9 +76,7 @@ router.delete(
 	authenticate,
 	[
 		param("id").exists().withMessage("expenseId is required"),
-		param("expenseItemId")
-			.exists()
-			.withMessage("expenseItemId is required"),
+		param("expenseItemId").exists().withMessage("expenseItemId is required"),
 	],
 	deleteExpenseItem
 );
