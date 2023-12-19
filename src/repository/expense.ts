@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, ObjectId } from "mongoose";
 import ExpenseModel from "../models/expenses";
 import ExpenseItemModel from "../models/expenseItems";
 import {
@@ -29,12 +29,17 @@ const createItem = async (data: IExpenseItemProps) => {
 	return results;
 };
 const getItemById = async (id: string): Promise<IExpenseItemResponse | null> => {
-	const results = await ExpenseItemModel.findById(id);
+	const results = await ExpenseItemModel.findById(id).exec();
 	return results;
 };
 
 const removeItem = async (id: string): Promise<Document | null> => {
-	const results = await ExpenseItemModel.deleteOne({ _id: id });
+	const results = await ExpenseItemModel.findByIdAndDelete(id).exec();
+	return results;
+};
+
+const removeDeletedItemFromList = async (id: string, itemId: ObjectId) => {
+	const results = await ExpenseModel.findByIdAndUpdate(id, { $pull: { items: itemId } }).exec();
 	return results;
 };
 export const ExpenseRepository: IExpenseRepository = {
@@ -44,4 +49,18 @@ export const ExpenseRepository: IExpenseRepository = {
 	createItem,
 	getItemById,
 	removeItem,
+	removeDeletedItemFromList,
 };
+
+/* Find all ExpenseItems with their populated Categories and Tags:
+const expenseItemsWithDetails = await ExpenseItem.find().populate("categoryId").populate("tags").exec(); */
+
+/* Find ExpenseItems for a specific Expense:
+const expenseIdToFind = "your-expense-id";
+const expenseItemsForExpense = await ExpenseItem.find({ expenseId: expenseIdToFind }).exec();
+console.log(expenseItemsForExpense); */
+
+// Find Expenses with a specific ExpenseItem ID:
+/* const expenseItemIdToFind = "your-expense-item-id";
+const expenseWithItem = await Expense.findOne({ items: expenseItemIdToFind }).exec();
+console.log(expenseWithItem); */
