@@ -1,18 +1,20 @@
 import { type Response, type Request, type NextFunction } from "express";
 import { validationResult } from "express-validator";
 import ExpenseModel from "../models/expenses";
-import ExpenseItemModel from "../models/expenseItems";
+import { ExpenseService } from "@src/services/expense";
+import mongoose from "mongoose";
 
-export const getExpenses = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const getExpensesList = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const expenses = await ExpenseModel.find();
-		res.status(200).json({
-			message: "Expenses retrieved successfully",
-			data: expenses,
+		const expenses = await ExpenseService.getExpenseList();
+		if (expenses) {
+			return res.status(200).json({
+				message: "Expenses retrieved successfully",
+				data: expenses,
+			});
+		}
+		return res.status(400).json({
+			message: "Something went wrong fetching expenses ",
 		});
 	} catch (error: any) {
 		if (!error.status) {
@@ -22,11 +24,7 @@ export const getExpenses = async (
 	}
 };
 
-export const createExpense = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const createExpense = async (req: Request, res: Response, next: NextFunction) => {
 	const { title } = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -35,11 +33,13 @@ export const createExpense = async (
 		throw error;
 	}
 	try {
-		const newExpense = await new ExpenseModel({ title }).save();
-		res.status(201).json({
-			message: "New Expense created successfully!",
-			data: newExpense,
-		});
+		const newExpense = await ExpenseService.createList({ title });
+		if (newExpense) {
+			return res.status(201).json({
+				message: "New Expense created successfully!",
+				data: newExpense,
+			});
+		}
 	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
@@ -48,15 +48,10 @@ export const createExpense = async (
 	}
 };
 
-export const getExpenseById = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const getExpenseListById = async (req: Request, res: Response, next: NextFunction) => {
 	const { id } = req.params;
-	console.log(id);
 	try {
-		const expense = await ExpenseModel.findById(id).populate();
+		const expense = await ExpenseService.getExpense(id);
 		if (!expense) {
 			return res.status(404).json({
 				message: "Expense with id not found",
@@ -74,14 +69,10 @@ export const getExpenseById = async (
 	}
 };
 
-export const getExpenseItemById = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const getExpenseItemById = async (req: Request, res: Response, next: NextFunction) => {
 	const { expenseItemId } = req.params;
 	try {
-		const expenseItem = await ExpenseItemModel.findById(expenseItemId);
+		const expenseItem = await ExpenseService.getExpenseItemById(expenseItemId);
 		if (!expenseItem) {
 			return res.status(404).json({
 				message: "Expense item with id not found",
@@ -99,49 +90,35 @@ export const getExpenseItemById = async (
 	}
 };
 
-export const addExpenseItem = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const addExpenseItem = async (req: Request, res: Response, next: NextFunction) => {
 	const { id } = req.params;
-	const {
-		name,
-		amount,
-		description = "",
-		categoryId,
-		tags = [],
-		purchasedAmount = 0,
-	} = req.body;
+	const { name, amount, description = "", categoryId, tags = [], recurring = false } = req.body;
 	const errors = validationResult(req);
+
 	if (!errors.isEmpty()) {
 		const error: any = new Error("Required fields missing");
 		error.status = 400;
 		error.data = errors.array();
 		throw error;
 	}
+	console.log(id, "expenseId");
 	try {
-		const expense = await ExpenseModel.findById(id);
-		if (!expense) {
-			return res.status(404).json({
-				message: "Expense with id not found",
-			});
-		}
-		const expenseItem = await new ExpenseItemModel({
+		const newItem = await ExpenseService.createItem(id, {
 			name,
 			amount,
 			description,
 			categoryId,
 			tags,
-			purchasedAmount,
-			expenseId: id,
-		}).save();
-		expense.items.push(expenseItem._id);
-		await expense.save();
-		return res.status(201).json({
-			message: "New Item added to list successfully!",
-			data: expenseItem,
+			recurring,
+			expenseId: new mongoose.Types.ObjectId(id),
 		});
+		console.log(newItem);
+		if (newItem) {
+			return res.status(201).json({
+				message: "New Item added to list successfully!",
+				data: newItem,
+			});
+		}
 	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;
@@ -150,11 +127,7 @@ export const addExpenseItem = async (
 	}
 };
 
-export const updateExpense = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const updateExpense = async (req: Request, res: Response, next: NextFunction) => {
 	const { id } = req.params;
 	const { title } = req.body;
 	const errors = validationResult(req);
@@ -184,20 +157,8 @@ export const updateExpense = async (
 	}
 };
 
-export const updateExpenseItem = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const updateExpenseItem = async (req: Request, res: Response, next: NextFunction) => {
 	const { id } = req.params;
-	const {
-		name,
-		amount,
-		description = "",
-		categoryId,
-		tags = [],
-		purchasedAmount = 0,
-	} = req.body;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
 		const error: any = new Error("Provide required parameters");
@@ -206,23 +167,11 @@ export const updateExpenseItem = async (
 		throw error;
 	}
 	try {
-		const expenseItem = await ExpenseItemModel.findById(id);
-		if (!expenseItem) {
-			return res.status(404).json({
-				message: "Item with Id not found",
-			});
-		}
-		expenseItem.name = name;
-		expenseItem.amount = amount;
-		expenseItem.description = description;
-		expenseItem.categoryId = categoryId;
-		expenseItem.tags = tags;
-		expenseItem.purchasedAmount = purchasedAmount;
+		const expenseItem = await ExpenseService.updateExpenseItem(id, req.body);
 
-		const result = await expenseItem.save();
 		return res.status(201).json({
 			message: "Item updated successfully!",
-			data: result,
+			data: expenseItem,
 		});
 	} catch (error: any) {
 		if (!error.status) {
@@ -232,11 +181,7 @@ export const updateExpenseItem = async (
 	}
 };
 
-export const deleteExpenseItem = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+export const deleteExpenseItem = async (req: Request, res: Response, next: NextFunction) => {
 	const { id, expenseItemId } = req.params;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
@@ -246,14 +191,16 @@ export const deleteExpenseItem = async (
 		throw error;
 	}
 	try {
-		const expenseItem = await ExpenseItemModel.findById(expenseItemId);
-		const expense = await ExpenseModel.findById(id);
+		const expenseItem = await ExpenseService.deleteItem(expenseItemId);
 
 		if (!expenseItem) {
 			return res.status(404).json({
 				message: "Expense item with id not found",
 			});
 		}
+		return res.status(200).json({
+			message: "Expense Item removed successfully!",
+		});
 	} catch (error: any) {
 		if (!error.status) {
 			error.status = 500;

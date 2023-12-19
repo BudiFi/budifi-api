@@ -28,10 +28,6 @@ const expenseItemSchema = new Schema(
 				ref: "Tags",
 			},
 		],
-		purchasedAmount: {
-			type: Number,
-			required: false,
-		},
 		expenseId: {
 			type: Schema.Types.ObjectId,
 			ref: "Expense",
