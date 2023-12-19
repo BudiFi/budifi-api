@@ -182,7 +182,7 @@ export const updateExpenseItem = async (req: Request, res: Response, next: NextF
 };
 
 export const deleteExpenseItem = async (req: Request, res: Response, next: NextFunction) => {
-	const { id, expenseItemId } = req.params;
+	const { id } = req.params;
 	const errors = validationResult(req);
 	if (!errors.isEmpty()) {
 		const error: any = new Error("Provide required parameters");
@@ -191,11 +191,11 @@ export const deleteExpenseItem = async (req: Request, res: Response, next: NextF
 		throw error;
 	}
 	try {
-		const expenseItem = await ExpenseService.deleteItem(expenseItemId);
+		const expenseItem = await ExpenseService.deleteItem(id);
 
 		if (!expenseItem) {
-			return res.status(404).json({
-				message: "Expense item with id not found",
+			return res.status(400).json({
+				message: "Something went wrong deleting item",
 			});
 		}
 		return res.status(200).json({

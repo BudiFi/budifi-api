@@ -72,11 +72,10 @@ router.delete("/:id", authenticate, createExpense);
 
 // DELETE /expenses/:id/expense-item/:expenseItemId
 router.delete(
-	"/:id/expense-item/:expenseItemId",
+	"/expense-item/:id",
 	authenticate,
 	[
-		param("id").exists().withMessage("expenseId is required"),
-		param("expenseItemId").exists().withMessage("expenseItemId is required"),
+		param("id").exists().withMessage("expense item id is required"),
 	],
 	deleteExpenseItem
 );

@@ -16,6 +16,7 @@ export interface IExpenseItemResponse extends Document {
 	categoryId: string;
 	tags: string[];
 	recurring: boolean;
+	expenseId: ObjectId;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -41,4 +42,5 @@ export interface IExpenseRepository {
 	createItem: (data: IExpenseItemProps) => Promise<Document | null>;
 	getItemById: (id: string) => Promise<IExpenseItemResponse | null>;
 	removeItem: (id: string) => Promise<Document | null>;
+	removeDeletedItemFromList: (id: string, itemId: ObjectId) => Promise<Document | null>;
 }

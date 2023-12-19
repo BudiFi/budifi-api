@@ -92,13 +92,17 @@ const updateExpenseItem = async (id: string, data: IExpenseItemProps) => {
 const deleteItem = async (id: string) => {
 	try {
 		const item = await getExpenseItemById(id);
-		if (item) {
-			const deleteItem = await ExpenseRepository.removeItem(id);
-			return deleteItem;
+		if (!item) {
+			const err: any = new Error("Expense item with id not found");
+			err.statusCode = 404;
+			throw err;
 		}
+		const itemResults = await ExpenseRepository.removeItem(id);
+		await ExpenseRepository.removeDeletedItemFromList(id, item.expenseId);
+		return itemResults;
 	} catch (error) {
 		const err = new Error("Something went wrong, server error");
-		throw err;
+		throw error;
 	}
 };
 
