@@ -1,5 +1,4 @@
 import { IncomeRepository } from "@src/repository/income";
-import { Document } from "mongoose";
 import {
 	ICreateIncomeProps,
 	IncomeResult,

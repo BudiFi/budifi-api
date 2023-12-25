@@ -7,6 +7,7 @@ import path from "path";
 import expenseRoutes from "@routes/expense";
 import categoryRoutes from "@routes/category";
 import incomeRoutes from "@routes/income";
+import tagRoutes from "@routes/tags";
 
 const MONGO_SECRET = process.env.MONGO_SECRET;
 const MONGO_USER = process.env.MONGO_USER;
@@ -31,6 +32,7 @@ app.use("/expenses", expenseRoutes);
 app.use("/income", incomeRoutes);
 app.use("/auth", authRoutes);
 app.use("/category", categoryRoutes);
+app.use("/tags", tagRoutes);
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
 	console.log(error);

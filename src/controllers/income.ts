@@ -47,6 +47,13 @@ export const getIncomeById = async (req: Request, res: Response, next: NextFunct
 
 export const getIncomeByDate = async (req: Request, res: Response, next: NextFunction) => {
 	const { startDate, endDate } = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: any = new Error("Required fields missing");
+		error.status = 400;
+		error.data = errors.array();
+		throw error;
+	}
 
 	try {
 		const income = await IncomeService.getIncomeByDateRange({
@@ -72,6 +79,13 @@ export const getIncomeByDate = async (req: Request, res: Response, next: NextFun
 
 export const createIncome = async (req: Request, res: Response, next: NextFunction) => {
 	const { title, amount, transactionId } = req.body;
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: any = new Error("Required fields missing");
+		error.status = 400;
+		error.data = errors.array();
+		throw error;
+	}
 	try {
 		const newIncome = await IncomeService.createNewIncome({ title, amount, transactionId });
 		console.log(newIncome, "incomeList");
@@ -94,6 +108,15 @@ export const createIncome = async (req: Request, res: Response, next: NextFuncti
 export const editIncome = async (req: Request, res: Response, next: NextFunction) => {
 	const { title, amount } = req.body;
 	const { id } = req.params;
+
+	const errors = validationResult(req);
+	if (!errors.isEmpty()) {
+		const error: any = new Error("Required fields missing");
+		error.status = 400;
+		error.data = errors.array();
+		throw error;
+	}
+
 	try {
 		const updatedIncome = await IncomeService.updateIncome(id, { title, amount });
 
@@ -104,7 +127,7 @@ export const editIncome = async (req: Request, res: Response, next: NextFunction
 			});
 		}
 		return res.status(400).json({
-			message: "Something went wrong retrieving income",
+			message: "Something went wrong updating income",
 		});
 	} catch (error: any) {
 		if (!error.status) {

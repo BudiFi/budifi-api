@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import IncomeModel from "@models/income";
 import {
 	IAllIncomeResponse,
