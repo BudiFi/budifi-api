@@ -29,7 +29,7 @@ const createItem = async (data: IExpenseItemProps) => {
 	return results;
 };
 const getItemById = async (id: string): Promise<IExpenseItemResponse | null> => {
-	const results = await ExpenseItemModel.findById(id).exec();
+	const results = await ExpenseItemModel.findById(id).populate("tags").exec();
 	return results;
 };
 
