@@ -51,6 +51,9 @@
 		"tsconfig-paths": "^4.2.0",
 		"typescript": "^5.2.2"
 	},
+	"engines": {
+		"node": "'>=18.0.0 || >=20.0.0"
+	},
 	"husky": {
 		"hooks": {
 			"pre-commit": "npm run lint"
